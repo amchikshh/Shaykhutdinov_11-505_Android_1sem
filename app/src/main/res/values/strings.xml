@@ -1,7 +1,19 @@
 <resources>
-    <string name="app_name">Android_1sem</string>
-    <string name="first_and_last_name">Шайхутдинов Амир</string>
-    <string name="group_number">11-505</string>
-    <string name="button">кнопка</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="app_name">Android_1sem</string>
+    <string name="blank_email">Почта не может быть пустой</string>
+    <string name="blank_password">Пароль не может быть пустым</string>
+    <string name="incorrect_email">некорректная почта</string>
+    <string name="incorrect_password">некорректный пароль</string>
+    <string name="email">email</string>
+    <string name="password">password</string>
+    <string name="auth">Авторизоваться</string>
+    <string name="equal_password">Пароли совпадают</string>
+    <string name="not_equal_password">Пароли не совпадают</string>
+    <string name="generated_password">Сгенерированный пароль</string>
+    <string name="show">Показать пароль</string>
+    <string name="hide">Скрыть пароль</string>
+    <string name="back">Вернуться назад</string>
+    <string name="correctPic">https://cdn-icons-png.flaticon.com/512/6520/6520110.png</string>
+    <string name="incorrectPic">https://cdn-icons-png.flaticon.com/512/6711/6711656.png</string>
 </resources>
