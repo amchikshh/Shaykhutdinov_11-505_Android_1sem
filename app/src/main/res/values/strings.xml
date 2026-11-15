@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Android_1sem</string>
-    <string name="first_and_last_name">Шайхутдинов Амир</string>
-    <string name="group_number">11-505</string>
-    <string name="button">кнопка</string>
+    <string name="first_field">поле для заголовка</string>
+    <string name="second_field">поле для текста</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="open_settings_button">Открыть настройки</string>
+    <string name="open_settings">Для корректной работы приложения необходимо предоставить дотсуп к получению уведомлений</string>
+    <string name="notification_button">Кнопка для уведомления</string>
 </resources>
