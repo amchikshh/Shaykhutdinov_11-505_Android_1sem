@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             MaterialTheme {
+
                 Screen()
             }
         }
@@ -48,10 +49,10 @@ class MainActivity : AppCompatActivity() {
         val coroutineScope = rememberCoroutineScope()
 
         val n = input.toIntOrNull()
-        val isValid = n != null && n in 1..10
+        val isValid = n != null && n in 0..10
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
@@ -62,8 +63,6 @@ class MainActivity : AppCompatActivity() {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Text("Выполнено: ${(progress * 100).roundToInt()}%")
-
             Text("Введите количество корутин:")
 
             Text("Количество корутин: ${sliderPosition.roundToInt()}")
@@ -71,9 +70,8 @@ class MainActivity : AppCompatActivity() {
             Slider(
                 value = sliderPosition,
                 onValueChange = {
-                    val number = it.roundToInt()
-                    sliderPosition = number.toFloat()
-                    input = number.toString()
+                    sliderPosition = it.roundToInt().toFloat()
+                    input = sliderPosition.roundToInt().toString()
                 },
                 valueRange = 0f..10f,
                 steps = 9
@@ -98,9 +96,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 },
-                label = {
-                    Text("Количество корутин (0–10)")
-                },
+                label = { Text("Количество корутин (0–10)") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
                 ),
@@ -110,19 +106,17 @@ class MainActivity : AppCompatActivity() {
 
             Button(
                 onClick = {
-                    val amount = n ?: 0
-
-                    coroutineScope.coroutineContext.cancelChildren()
                     progress = 0f
+                    coroutineScope.coroutineContext.cancelChildren()
 
                     coroutineScope.launch {
-                        for (i in 1..amount) {
+                        for (i in 1..(n ?: 0)) {
                             letsWait()
-                            progress = i.toFloat() / amount
+                            progress = i.toFloat() / (n ?: 1)
                         }
                     }
                 },
-                enabled = isValid,
+                enabled = isValid && n!! > 0,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Последовательно")
@@ -130,26 +124,25 @@ class MainActivity : AppCompatActivity() {
 
             Button(
                 onClick = {
+                    progress = 0f
+                    coroutineScope.coroutineContext.cancelChildren()
+
                     val amount = n ?: 0
 
-                    coroutineScope.coroutineContext.cancelChildren()
-                    progress = 0f
-
-                    coroutineScope.launch {
-                        var completed = 0
-
-                        coroutineScope {
-                            repeat(amount) {
-                                launch {
-                                    letsWait()
-                                    completed++
-                                    progress = completed.toFloat() / amount
+                    if (amount > 0) {
+                        coroutineScope.launch {
+                            coroutineScope {
+                                repeat(amount) {
+                                    launch {
+                                        letsWait()
+                                        progress += 1f / amount
+                                    }
                                 }
                             }
                         }
                     }
                 },
-                enabled = isValid,
+                enabled = isValid && n!! > 0,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Параллельно")
