@@ -42,3 +42,34 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    val generatedPassword = remember {PasswordGenerator.generate(8) }
+
+    NavHost(
+        navController = navController,
+        startDestination = Screens.Auth
+    ) {
+        composable<Screens.Auth> {
+            FirstScreen (
+                onButtonClick = {email, password ->
+                    navController.navigate(
+                        Screens.Profile(email, password)
+                    )
+                }
+            )
+        }
+        composable<Screens.Profile> { entry ->
+            val args = entry.toRoute<Screens.Profile>()
+            SecondScreen(
+                email = args.email,
+                password = args.password,
+                generatedPassword = generatedPassword,
+                onBack = {navController.popBackStack()}
+            )
+        }
+    }
+}
