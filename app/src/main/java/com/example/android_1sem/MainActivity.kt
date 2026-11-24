@@ -1,75 +1,173 @@
+
 package com.example.android_1sem
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.ui.NavDisplay
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MaterialTheme {
-                Surface {
-                    val backStack = rememberNavBackStack(first)
-
-                    NavDisplay(
-                        backStack = backStack,
-                        onBack = { backStack.removeLastOrNull() },
-                        entryProvider = entryProvider {
-
-                            entry<first> {
-                                firstScreen(
-                                    onFilmClick = { index ->
-                                        backStack.add(second(index))
-                                    }
-                                )
-                            }
-
-                            entry<second> { key ->
-                                secondScreen(
-                                    id = key.id,
-                                )
-                            }
-                        }
-                    )
-                }
+                Screen()
             }
         }
     }
-}
 
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
+    @Composable
+    fun Screen() {
 
-    val generatedPassword = remember {PasswordGenerator.generate(8) }
+        var sliderPosition by remember { mutableFloatStateOf(3f) }
+        var input by remember { mutableStateOf("3") }
+        var progress by remember { mutableFloatStateOf(0f) }
 
-    NavHost(
-        navController = navController,
-        startDestination = Screens.Auth
-    ) {
-        composable<Screens.Auth> {
-            FirstScreen (
-                onButtonClick = {email, password ->
-                    navController.navigate(
-                        Screens.Profile(email, password)
-                    )
-                }
+        val coroutineScope = rememberCoroutineScope()
+
+        val n = input.toIntOrNull()
+        val isValid = n != null && n in 1..10
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth()
             )
-        }
-        composable<Screens.Profile> { entry ->
-            val args = entry.toRoute<Screens.Profile>()
-            SecondScreen(
-                email = args.email,
-                password = args.password,
-                generatedPassword = generatedPassword,
-                onBack = {navController.popBackStack()}
+
+            Text("Выполнено: ${(progress * 100).roundToInt()}%")
+
+            Text("Введите количество корутин:")
+
+            Text("Количество корутин: ${sliderPosition.roundToInt()}")
+
+            Slider(
+                value = sliderPosition,
+                onValueChange = {
+                    val number = it.roundToInt()
+                    sliderPosition = number.toFloat()
+                    input = number.toString()
+                },
+                valueRange = 0f..10f,
+                steps = 9
             )
+
+            OutlinedTextField(
+                value = input,
+                onValueChange = { value ->
+                    if (
+                        value.isEmpty() ||
+                        (
+                                value.length <= 2 &&
+                                        value.all { it.isDigit() } &&
+                                        value.toIntOrNull()?.let { it in 0..10 } == true
+                                )
+                    ) {
+                        input = value
+
+                        val number = value.toIntOrNull()
+                        if (number != null) {
+                            sliderPosition = number.toFloat()
+                        }
+                    }
+                },
+                label = {
+                    Text("Количество корутин (0–10)")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Button(
+                onClick = {
+                    val amount = n ?: 0
+
+                    coroutineScope.coroutineContext.cancelChildren()
+                    progress = 0f
+
+                    coroutineScope.launch {
+                        for (i in 1..amount) {
+                            letsWait()
+                            progress = i.toFloat() / amount
+                        }
+                    }
+                },
+                enabled = isValid,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Последовательно")
+            }
+
+            Button(
+                onClick = {
+                    val amount = n ?: 0
+
+                    coroutineScope.coroutineContext.cancelChildren()
+                    progress = 0f
+
+                    coroutineScope.launch {
+                        var completed = 0
+
+                        coroutineScope {
+                            repeat(amount) {
+                                launch {
+                                    letsWait()
+                                    completed++
+                                    progress = completed.toFloat() / amount
+                                }
+                            }
+                        }
+                    }
+                },
+                enabled = isValid,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Параллельно")
+            }
+
+            Button(
+                onClick = {
+                    coroutineScope.coroutineContext.cancelChildren()
+                    progress = 0f
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Отменить")
+            }
         }
+    }
+
+    private suspend fun letsWait() {
+        delay(2000L)
     }
 }
