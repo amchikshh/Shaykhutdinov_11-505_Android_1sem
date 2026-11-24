@@ -1,14 +1,10 @@
 package com.example.android_1sem
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
-object Screens {
-    @Serializable
-    data object Auth
+@Serializable
+data object first : NavKey
 
-    @Serializable
-    data class Profile(
-        val email: String,
-        val password: String
-    )
-}
+@Serializable
+data class second(val id: Int) : NavKey
